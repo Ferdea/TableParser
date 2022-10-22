@@ -16,6 +16,7 @@ namespace TableParser
         [TestCase("aboba'hello'wo\\\\'rld\"wfmtla", 5, "hello", 7)]
         [TestCase("abcd\"rhmm' rhmlr \"\"ehel ''", 4, "rhmm' rhmlr ", 14)]
         [TestCase("thjn' \" rhm aw ht \\\\\\' ' ht", 4, " \" rhm aw ht \\' ", 20)]
+        [TestCase("'\\\\'", 0, "\\", 4)]
         public void Test(string line, int startIndex, string expectedValue, int expectedLength)
         {
             var actualToken = QuotedFieldTask.ReadQuotedField(line, startIndex);
@@ -33,40 +34,26 @@ namespace TableParser
             for (var i = startIndex + 1; i < line.Length; i++)
             {
                 length++;
-                if (line[i] == startChar && line[i - 1] != '\\')
+                if (line[i] == startChar)
                     break;
+                if (line[i] == '\\')
+                {
+                    length++;
+                    i += 1;
+                }
                 field.Append(line[i]);
             }
 
             return (field.ToString(), length);
         }
 
-        public static string DeleteSlash(string field)
-        {
-            var result = new StringBuilder();
-            for (var i = 0; i < field.Length; i++)
-            {
-                if (field[i] == '\\')
-                {
-                    result.Append(field[i + 1]);
-                    i += 1;
-                    continue;
-                }
-                result.Append(field[i]);
-            }
-
-            return result.ToString();
-        }
-        
         public static Token ReadQuotedField(string line, int startIndex)
         {
             string field;
             int length;
             (field, length) = GetField(line, startIndex);
 
-            var result = DeleteSlash(field);
-            
-            return new Token(result, startIndex, length);
+            return new Token(field, startIndex, length);
         }
     }
 }
