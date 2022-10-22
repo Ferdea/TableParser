@@ -12,11 +12,10 @@ namespace TableParser
         [TestCase("\"\\\\a\"", 0, "\\a", 5)]
         [TestCase("'\"a\"'", 0, "\"a\"", 5)]
         [TestCase("'a b'", 0, "a b", 5)]
-        [TestCase("'abc", 0, "abc", 4)]
-        [TestCase("\"a \"", 0, "a ", 4)]
-        [TestCase("' a'", 0, " a", 4)]
-        [TestCase("a a'a'", 3, "a", 3)]
-        [TestCase("a a\"a\"", 3, "a", 3)]
+        [TestCase("teststring\"hello'wo\\\\'rld\"wfmtla", 10, "hello'wo\\'rld", 16)]
+        [TestCase("aboba'hello'wo\\\\'rld\"wfmtla", 5, "hello", 7)]
+        [TestCase("abcd\"rhmm' rhmlr \"\"ehel ''", 4, "rhmm' rhmlr ", 14)]
+        [TestCase("thjn' \" rhm aw ht \\\\\\' ' ht", 4, " \" rhm aw ht \\' ", 20)]
         public void Test(string line, int startIndex, string expectedValue, int expectedLength)
         {
             var actualToken = QuotedFieldTask.ReadQuotedField(line, startIndex);
@@ -26,7 +25,7 @@ namespace TableParser
 
     class QuotedFieldTask
     {
-        public static Token ReadQuotedField(string line, int startIndex)
+        public static (string, int) GetField(string line, int startIndex)
         {
             var field = new StringBuilder();
             var startChar = line[startIndex];
@@ -39,6 +38,11 @@ namespace TableParser
                 field.Append(line[i]);
             }
 
+            return (field.ToString(), length);
+        }
+
+        public static string DeleteSlash(string field)
+        {
             var result = new StringBuilder();
             for (var i = 0; i < field.Length; i++)
             {
@@ -50,8 +54,19 @@ namespace TableParser
                 }
                 result.Append(field[i]);
             }
+
+            return result.ToString();
+        }
+        
+        public static Token ReadQuotedField(string line, int startIndex)
+        {
+            string field;
+            int length;
+            (field, length) = GetField(line, startIndex);
+
+            var result = DeleteSlash(field);
             
-            return new Token(result.ToString(), startIndex, length);
+            return new Token(result, startIndex, length);
         }
     }
 }
