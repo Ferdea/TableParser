@@ -12,6 +12,10 @@ namespace TableParser
     {
         [TestCase("''", 0, "", 2)]
         [TestCase("'a'", 0, "a", 3)]
+        [TestCase("teststring\"hello'wo\\\\'rld\"wfmtla", 10, "hello'wo\\'rld", 16)]
+        [TestCase("aboba'hello'wo\\\\'rld\"wfmtla", 5, "hello", 7)]
+        [TestCase("abcd\"rhmm' rhmlr \"\"ehel ''", 4, "rhmm' rhmlr ", 14)]
+        [TestCase("thjn' \" rhm aw ht \\\\\\' ' ht", 4, " \" rhm aw ht \\' ", 20)]
         public void Test(string line, int startIndex, string expectedValue, int expectedLength)
         {
             var actualToken = QuotedFieldTask.ReadQuotedField(line, startIndex);
