@@ -17,15 +17,34 @@ namespace TableParser
             var actualToken = QuotedFieldTask.ReadQuotedField(line, startIndex);
             Assert.AreEqual(new Token(expectedValue, startIndex, expectedLength), actualToken);
         }
-
-        // Добавьте свои тесты
     }
 
     class QuotedFieldTask
     {
         public static Token ReadQuotedField(string line, int startIndex)
         {
-            return new Token(line, startIndex, line.Length - startIndex);
+            var field = new StringBuilder();
+            var startChar = line[startIndex];
+            for (var i = startIndex + 1; i < line.Length; i++)
+            {
+                if (line[i] == startChar && line[i - 1] != '\\')
+                    break;
+                field.Append(line[i]);
+            }
+
+            var result = new StringBuilder();
+            for (var i = 0; i < field.Length; i++)
+            {
+                if (field[i] == '\\')
+                {
+                    result.Append(field[i + 1]);
+                    i += 1;
+                    continue;
+                }
+                result.Append(field[i]);
+            }
+            
+            return new Token(result.ToString(), startIndex, field.Length + 2);
         }
     }
 }
